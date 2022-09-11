@@ -1,0 +1,38 @@
+<template id="button-clicker">
+    <script type="module">
+        const {origin} = new URL(import.meta.url);
+        const {useState} = await import(`${origin}/weird-web-framework/testing-ground/modules/useState.js`)
+        const memo = {};
+
+        export const state = useState({clicks: 0, clacks: 0});
+
+        export const randomColor = (id) => {
+            if(memo[id]) return memo[id];
+
+            const color = `#${Math.floor(Math.random()*16777215).toString(16)}`
+            memo[id] = color;
+
+            return color;
+        };
+
+        export const onClick = () => {
+            state.clicks += 1;
+        }
+
+        export const onClack = () => {
+            state.clacks += 1
+        }
+    </script>
+
+    <h2>This is a button clicker widget</h2>
+
+    <button onclick="onClick()">Click me</button>
+    <button onclick="onClack()">Clack me</button>
+
+    <with-ctx>
+        <p style="color:${randomColor(state.clicks)}">You've clicked ${state.clicks} times!</p>
+        <p style="color:${randomColor(state.clacks)}">You've clacked ${state.clacks} times!</p>
+
+        <p>${state.clicks > 3 ? '<button-clicker>  </button-clicker>' : ''}</p>
+    </with-ctx>
+</template>
