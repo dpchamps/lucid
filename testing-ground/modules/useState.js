@@ -7,15 +7,14 @@ export const useState = (initialState) => {
             watcher()
         }
     }
-    const base = {
-        ...initialState,
-        [STATEFUL]: {
-            watch: (cb) => {
-                watchers.push(cb)
-            }
+
+    initialState[STATEFUL] = {
+        watch: (cb) => {
+            watchers.push(cb)
         }
     }
-    return new Proxy(base, {
+
+    return new Proxy(initialState, {
         set(target, p, value, receiver) {
             const result = Reflect.set(target, p, value, receiver);
             onUpdate();

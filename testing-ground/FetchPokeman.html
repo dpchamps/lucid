@@ -1,0 +1,32 @@
+<template id="fetch-pokeman">
+    <script type="module">
+        const {origin} = new URL(import.meta.url);
+        const {useState} = await import(`${origin}/weird-web-framework/testing-ground/modules/useState.js`)
+
+        const result = await fetch("https://pokeapi.co/api/v2/pokemon?limit=10&offset=0");
+        const {results} = await result.json();
+
+        export const pokelist = useState(
+            results.map(({name}) => name)
+        );
+        debugger;
+
+        export const sortList = () => {
+            pokelist.sort();
+        }
+
+        export const swapEnds = () => {
+            const temp = pokelist[0];
+            pokelist[0] = pokelist[pokelist.length-1];
+            pokelist[pokelist.length-1] = temp;
+        }
+    </script>
+    <button onclick="sortList()" >Sort </button>
+    <button onclick="swapEnds()">Swap Ends</button>
+    <with-ctx>
+        <pretty-list pokemon="pokelist"></pretty-list>
+        <ul>
+        ${pokelist.map(name => `<li>${name}</li>`).join('')}
+        </ul>
+    </with-ctx>
+</template>

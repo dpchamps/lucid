@@ -1,0 +1,27 @@
+<template id="another-test">
+    <script type="module">
+        const {origin} = new URL(import.meta.url);
+        const {useState} = await import(`${origin}/testing-ground/modules/useState.js`);
+
+        export const state = useState({isTrue: false});
+
+        export const toggle = () => state.isTrue = !state.isTrue;
+    </script>
+
+
+    <with-ctx>
+        ${ state.isTrue ? '<button-clicker></button-clicker>' : '<p>Goodbye</p>'}
+
+        <button style="visibility: ${!state.isTrue ? 'visible' : 'hidden'}" onclick="toggle()">
+                <x-fragment>It's currently ${state.isTrue}</x-fragment>
+        </button>
+
+    <x-fragment>
+        I'm chillin!
+    </x-fragment>
+
+        <button style="visibility: ${state.isTrue ? 'visible' : 'hidden'}" onclick="toggle()">
+            <x-fragment>It's currently ${state.isTrue}</x-fragment>
+        </button>
+    </with-ctx>
+</template>

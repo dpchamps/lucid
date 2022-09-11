@@ -7,6 +7,8 @@ const entityMap = {
     '&#x2F;': "/"
 };
 
+import {TemplateBinder} from "./template-binder.js";
+
 export class WithContext extends HTMLElement {
     constructor() {
         super();
@@ -23,7 +25,9 @@ export class WithContext extends HTMLElement {
 
         if(!this.initialized){
             this.initialized = true;
-            this.innerHTML = interpolate();
+            const interpolated = interpolate();
+            this.innerHTML = interpolated;
+            TemplateBinder.bindTemplate(this, this.context);
             return;
         }
 
@@ -43,6 +47,7 @@ export class WithContext extends HTMLElement {
                 nextNode = thisWalker.nextSibling();
                 nextWalker.nextSibling()
             }else{
+                console.log(`Equal`, thisWalker.currentNode, nextWalker.currentNode)
                 nextNode = thisWalker.nextNode();
                 nextWalker.nextNode();
             }
@@ -51,6 +56,8 @@ export class WithContext extends HTMLElement {
         for(const [parent, current, next] of replacements){
             parent.deref().replaceChild(next.deref(), current.deref());
         }
+
+        TemplateBinder.bindTemplate(this, this.context);
     }
 
     connectedCallback(){

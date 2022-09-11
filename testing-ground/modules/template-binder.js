@@ -13,23 +13,27 @@ export class TemplateBinder extends HTMLElement {
         return (event) => boundFn.call(null, event);
     }
 
+    static bindImplicitProperties(node, context){
+        if(node.hasAttributes && node.hasAttributes()){
+            for(const {name, value} of node.attributes){
+                if(EVENT_LIST.has(name)){
+                    node[name] = context.withScope(value, 'event')
+                }
+            }
+        }
+
+        if(node.nodeName === "WITH-CTX"){
+            node.context = context;
+        }
+    }
+
     static bindTemplate(root, context){
         const stack = [];
 
         while(root){
             stack.push(...Array.from(root.children));
 
-            if(root.hasAttributes && root.hasAttributes()){
-                for(const {name, value} of root.attributes){
-                    if(EVENT_LIST.has(name)){
-                        root[name] = context.withScope(value, 'event')
-                    }
-                }
-            }
-
-            if(root.nodeName === "WITH-CTX"){
-                root.context = context;
-            }
+            this.bindImplicitProperties(root, context)
 
             root = stack.pop();
         }
@@ -38,8 +42,11 @@ export class TemplateBinder extends HTMLElement {
     async connectedCallback(componentName){
         const template = document.getElementById(componentName);
         const content = template.content;
+        const clonedContent = content.cloneNode(true);
+        const script = clonedContent.querySelector('script');
 
-        const script = content.querySelector('script');
+        clonedContent.removeChild(script);
+
         const shadowRoot = this.attachShadow({mode: 'open'});
 
         const objectUrl = URL.createObjectURL(new Blob([
@@ -49,7 +56,9 @@ export class TemplateBinder extends HTMLElement {
         }));
         const module = await import(objectUrl);
         const context = createContext(module);
-        const clonedContent = content.cloneNode(true);
+        this.context = context;
+
+
         TemplateBinder.bindTemplate(clonedContent, context);
 
         this.onCleanup = () => {
